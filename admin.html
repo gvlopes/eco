@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Painel Admin — Transportes Ecolub Br</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <img src="logo.svg" alt="logo" class="logo">
+    <h1>Painel Admin</h1>
+  </header>
+  <main class="container">
+    <div class="card">
+      <label>Senha Admin</label>
+      <input id="password" type="password" placeholder="Senha" />
+      <button id="btnLogin">Entrar</button>
+    </div>
+
+    <div id="panel" class="hidden">
+      <div class="card">
+        <h2>Gerar Rastreio</h2>
+        <input id="client" placeholder="Nome do cliente / referência" />
+        <button id="btnGenerate">Gerar Rastreio</button>
+        <div id="generated" class="small"></div>
+      </div>
+
+      <div class="card">
+        <h2>Gerenciar Rota</h2>
+        <label>Código</label>
+        <input id="routeCode" placeholder="codigo gerado" />
+        <label>Local</label>
+        <input id="location" placeholder="Ex: BR-101, km 120" />
+        <label>Observação</label>
+        <input id="note" placeholder="Ex: Em trânsito, parada para descanso" />
+        <button id="btnAddUpdate">Adicionar Atualização</button>
+        <div id="addResult" class="small"></div>
+      </div>
+
+      <div class="card">
+        <h2>Listar Rotas</h2>
+        <button id="btnList">Atualizar Lista</button>
+        <div id="routesList"></div>
+      </div>
+    </div>
+  </main>
+
+<script>
+let token = null;
+document.getElementById('btnLogin').addEventListener('click', async ()=>{
+  const pw = document.getElementById('password').value;
+  const res = await fetch('api.php?action=login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw})});
+  const data = await res.json();
+  if(data.success){ token = data.token; document.getElementById('panel').classList.remove('hidden'); alert('Logado com sucesso'); }
+  else alert('Senha incorreta');
+});
+
+document.getElementById('btnGenerate').addEventListener('click', async ()=>{
+  const client = document.getElementById('client').value || 'Cliente';
+  const res = await fetch('api.php?action=generate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token, client})});
+  const data = await res.json();
+  if(data.success){
+    document.getElementById('generated').innerHTML = 'Código gerado: <b>'+data.code+'</b><br/>Envie esse código ao cliente.';
+    document.getElementById('routeCode').value = data.code;
+  } else {
+    document.getElementById('generated').innerText = data.message || 'Erro';
+  }
+});
+
+document.getElementById('btnAddUpdate').addEventListener('click', async ()=>{
+  const code = document.getElementById('routeCode').value.trim();
+  const location = document.getElementById('location').value.trim();
+  const note = document.getElementById('note').value.trim();
+  if(!code) return alert('Insira o código da rota');
+  const res = await fetch('api.php?action=add_update', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token, code, location, note})});
+  const data = await res.json();
+  document.getElementById('addResult').innerText = data.message || (data.success? 'Atualização adicionada':'Erro');
+});
+
+document.getElementById('btnList').addEventListener('click', async ()=>{
+  const res = await fetch('api.php?action=list&token='+encodeURIComponent(token));
+  const data = await res.json();
+  if(!data.success) return alert('Erro ao listar');
+  const routes = data.routes || {};
+  const html = Object.keys(routes).map(c=>{
+    const r = routes[c];
+    return `<div class="route"><b>${c}</b> — ${r.client_name} — criado: ${new Date(r.created_at).toLocaleString()} — atualizações: ${r.updates.length}</div>`;
+  }).join('');
+  document.getElementById('routesList').innerHTML = html || '<p>Nenhuma rota</p>';
+});
+
+</script>
+</body>
+</html>

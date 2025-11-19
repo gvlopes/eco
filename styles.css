@@ -1,0 +1,27 @@
+/* Cores inspiradas na logo: azul, amarelo, verde, cinza/white on dark */
+:root{
+  --bg:#0b0b0b;
+  --card:#111218;
+  --accent-blue:#0b6fb6;
+  --accent-blue-2:#0b9bdb;
+  --accent-yellow:#f1c40f;
+  --accent-green:#27ae60;
+  --text:#e6e6e6;
+  --muted:#b5b5b5;
+}
+*{box-sizing:border-box;font-family:Inter, Arial, sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);min-height:100vh}
+.topbar{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(90deg,#050505, #0b0b0b);border-bottom:1px solid #111}
+.logo{height:56px}
+.container{max-width:900px;margin:30px auto;padding:0 16px}
+.card{background:var(--card);padding:18px;border-radius:12px;margin-bottom:14px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+.card.small{font-size:14px;padding:12px}
+.hidden{display:none}
+input{width:100%;padding:10px;border-radius:8px;border:1px solid #222;background:#0d0d0f;color:var(--text);margin:6px 0}
+button{background:var(--accent-blue);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+button:hover{opacity:0.95}
+.update{border-left:4px solid rgba(255,255,255,0.06);padding:8px;margin-bottom:8px}
+.update .time{font-size:12px;color:var(--muted)}
+.update .location{font-weight:600; margin-top:6px}
+.update .note{font-size:14px;color:var(--muted)}
+.route{padding:8px;border-bottom:1px dashed #222}

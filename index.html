@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Transportes Ecolub Br — Rastreio de Cargas</title>
+<link rel="icon" href="logo.svg" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <img src="logo.svg" alt="Transportes Ecolub Br" class="logo">
+    <h1>Rastreie sua carga</h1>
+  </header>
+  <main class="container">
+    <div class="card">
+      <label for="code">Código de rastreio</label>
+      <input id="code" placeholder="Cole o código aqui" />
+      <button id="btnTrack">Rastrear</button>
+    </div>
+    <div id="result" class="card hidden">
+      <h2>Atualizações</h2>
+      <div id="updates"></div>
+    </div>
+    <footer class="card small">
+      <p>Problemas? Entre em contato com a transportadora.</p>
+    </footer>
+  </main>
+
+<script>
+async function showMessage(msg) {
+  document.getElementById('updates').innerHTML = '<p>'+msg+'</p>';
+  document.getElementById('result').classList.remove('hidden');
+}
+
+document.getElementById('btnTrack').addEventListener('click', async ()=>{
+  const code = document.getElementById('code').value.trim();
+  if(!code) return alert('Insira o código de rastreio');
+  try {
+    const res = await fetch('api.php?action=track&code='+encodeURIComponent(code));
+    const data = await res.json();
+    if(!data.success) {
+      showMessage(data.message || 'Código não encontrado');
+      return;
+    }
+    const updates = data.updates || [];
+    if(updates.length === 0) {
+      showMessage('Nenhuma atualização disponível no momento.');
+      return;
+    }
+    const html = updates.map(u=>{
+      const d = new Date(u.ts);
+      return `<div class="update"><div class="time">${d.toLocaleString()}</div><div class="location">${u.location}</div><div class="note">${u.note}</div></div>`;
+    }).join('');
+    document.getElementById('updates').innerHTML = html;
+    document.getElementById('result').classList.remove('hidden');
+  } catch(err){
+    showMessage('Erro ao consultar servidor.');
+  }
+});
+</script>
+</body>
+</html>
